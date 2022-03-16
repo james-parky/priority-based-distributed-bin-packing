@@ -1,3 +1,8 @@
 # Priority Based Distributed Bin Packing Algorithm
 
-## For Matching Students with Supervisors that share a common topic interest
+## Usage:
+
+-   Inside the root directory run `node match.js`
+-   If required modules are missing, you can download them both using:
+    -   `npm -i node-fetch`
+    -   `npm -i fs`
