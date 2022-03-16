@@ -1,0 +1,90 @@
+{
+    "matches": [
+        {
+            "supervisorResponseId": "e5648062-7ba4-ec11-826d-281878971cb3",
+            "matchedStudentResponses": [
+                {
+                    "studentResponseId": "eb80a06e-99a0-ec11-826d-281878971cb3",
+                    "commonACMKeyword": "Hardware",
+                    "studentsChoices": [
+                        "ce6a21a6-3193-ec11-b400-000d3ab9b418",
+                        "40bb20bf-3193-ec11-b400-000d3ab9b418",
+                        "49d4a2b8-3193-ec11-b400-000d3ab9b418"
+                    ]
+                },
+                {
+                    "studentResponseId": "eb80a06e-99a0-ec11-826d-281878971cb3",
+                    "commonACMKeyword": "Surveys and overviews",
+                    "studentsChoices": [
+                        "ce6a21a6-3193-ec11-b400-000d3ab9b418",
+                        "40bb20bf-3193-ec11-b400-000d3ab9b418",
+                        "49d4a2b8-3193-ec11-b400-000d3ab9b418"
+                    ]
+                },
+                {
+                    "studentResponseId": "eb80a06e-99a0-ec11-826d-281878971cb3",
+                    "commonACMKeyword": "Metrics",
+                    "studentsChoices": [
+                        "ce6a21a6-3193-ec11-b400-000d3ab9b418",
+                        "40bb20bf-3193-ec11-b400-000d3ab9b418",
+                        "49d4a2b8-3193-ec11-b400-000d3ab9b418"
+                    ]
+                },
+                {
+                    "studentResponseId": "d3e92ed0-6ba4-ec11-826d-281878971cb3",
+                    "commonACMKeyword": "Hardware",
+                    "studentsChoices": [
+                        "54d4a2b8-3193-ec11-b400-000d3ab9b418",
+                        "442ba8b2-3193-ec11-b400-000d3ab9b418",
+                        "40bb20bf-3193-ec11-b400-000d3ab9b418"
+                    ]
+                },
+                {
+                    "studentResponseId": "d3e92ed0-6ba4-ec11-826d-281878971cb3",
+                    "commonACMKeyword": "Surveys and overviews",
+                    "studentsChoices": [
+                        "54d4a2b8-3193-ec11-b400-000d3ab9b418",
+                        "442ba8b2-3193-ec11-b400-000d3ab9b418",
+                        "40bb20bf-3193-ec11-b400-000d3ab9b418"
+                    ]
+                },
+                {
+                    "studentResponseId": "d3e92ed0-6ba4-ec11-826d-281878971cb3",
+                    "commonACMKeyword": "Metrics",
+                    "studentsChoices": [
+                        "54d4a2b8-3193-ec11-b400-000d3ab9b418",
+                        "442ba8b2-3193-ec11-b400-000d3ab9b418",
+                        "40bb20bf-3193-ec11-b400-000d3ab9b418"
+                    ]
+                },
+                {
+                    "studentResponseId": "bc065b20-6ca4-ec11-826d-281878971cb3",
+                    "commonACMKeyword": "Hardware",
+                    "studentsChoices": [
+                        "40bb20bf-3193-ec11-b400-000d3ab9b418",
+                        "54d4a2b8-3193-ec11-b400-000d3ab9b418",
+                        "49d4a2b8-3193-ec11-b400-000d3ab9b418"
+                    ]
+                },
+                {
+                    "studentResponseId": "bc065b20-6ca4-ec11-826d-281878971cb3",
+                    "commonACMKeyword": "Surveys and overviews",
+                    "studentsChoices": [
+                        "40bb20bf-3193-ec11-b400-000d3ab9b418",
+                        "54d4a2b8-3193-ec11-b400-000d3ab9b418",
+                        "49d4a2b8-3193-ec11-b400-000d3ab9b418"
+                    ]
+                },
+                {
+                    "studentResponseId": "bc065b20-6ca4-ec11-826d-281878971cb3",
+                    "commonACMKeyword": "Metrics",
+                    "studentsChoices": [
+                        "40bb20bf-3193-ec11-b400-000d3ab9b418",
+                        "54d4a2b8-3193-ec11-b400-000d3ab9b418",
+                        "49d4a2b8-3193-ec11-b400-000d3ab9b418"
+                    ]
+                }
+            ]
+        }
+    ]
+}
