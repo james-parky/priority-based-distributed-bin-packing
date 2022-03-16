@@ -111,3 +111,16 @@ const writeMatches = (matches) => {
     console.log(allMatches);
     writeMatches({ matches: allMatches });
 })();
+
+/*
++----------------------------------------------===USAGE===-----------------------------------------------+
+|    Admin will be able to run the code from a page using a button, or triggered by daily automatic flow |
+|    When this code is run, the generated JSON is used to populated a 'matches' table                    |
+|    Admin is presented with all matches that were made [All initially presented as 'PENDING' status]    | 
+|    Admin can manually approve or reject matches                                                        |
+|        Approved matches have their status updated to 'APPROVED'                                        |
+|        Rejected matches are removed from the table and are sent back into this algorithm               |
+|    This repeats until the administrator is satsified with the results                                  |
+|    They will also have an option to start again, removing all matches                                  |
+=--------------------------------------------------------------------------------------------------------+
+*/
