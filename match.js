@@ -17,26 +17,31 @@ const getParsedStudentResponses = async () => {
     var parsedStudentResponses = [];
 
     studentResponses.forEach((response) => {
-        var realACMKeywords = [];
-        response.choices.forEach((roughChoiceID, index) => {
-            topicToACMMaps
-                .filter((topicMap) => topicMap.topicRecordId == roughChoiceID)
-                .forEach((topicMap) => {
-                    var realACMKeywordId = acmRecordIds.find(
-                        (acmRecordId) => acmRecordId == topicMap.acmRecordId
-                    );
-                    realACMKeywords.push({
-                        acmRecordId: realACMKeywordId,
-                        priority: index + 1,
+        // Ignores student respones that don't contain three choices from the topics list
+        if (response.choices.every((choice) => choice !== undefined)) {
+            var realACMKeywords = [];
+            response.choices.forEach((roughChoiceID, index) => {
+                topicToACMMaps
+                    .filter(
+                        (topicMap) => topicMap.topicRecordId == roughChoiceID
+                    )
+                    .forEach((topicMap) => {
+                        var realACMKeywordId = acmRecordIds.find(
+                            (acmRecordId) => acmRecordId == topicMap.acmRecordId
+                        );
+                        realACMKeywords.push({
+                            acmRecordId: realACMKeywordId,
+                            priority: index + 1,
+                        });
                     });
-                });
-        });
-        parsedStudentResponses.push({
-            responseId: response.responseId,
-            //contactName: response.contact,
-            acmKeywords: realACMKeywords,
-            choices: response.choices,
-        });
+            });
+            parsedStudentResponses.push({
+                responseId: response.responseId,
+                //contactName: response.contact,
+                acmKeywords: realACMKeywords,
+                choices: response.choices,
+            });
+        }
     });
     return parsedStudentResponses;
 };
@@ -87,6 +92,7 @@ const writeMatches = (matches) => {
 
 (async function match() {
     var parsedStudentResponses = await getParsedStudentResponses();
+    console.log(parsedStudentResponses);
     var parsedSupervisorResponses = await getParsedSupervisorResponses();
     var allMatches = [];
 
@@ -94,11 +100,11 @@ const writeMatches = (matches) => {
         var matches = [];
 
         parsedStudentResponses.forEach((studentResponse) => {
-            studentResponse.acmKeywords.forEach((acmKeyword) => {
-                supervisorResponse.acmKeywords.includes(acmKeyword.keyword) &&
+            studentResponse.acmKeywords.forEach((acmRecordId) => {
+                supervisorResponse.acmKeywords.includes(acmRecordId) &&
                     matches.push({
                         studentResponseId: studentResponse.responseId,
-                        commonACMKeyword: acmKeyword.keyword,
+                        commonACMKeywordId: acmRecordId,
                         studentsChoices: studentResponse.choices,
                     });
             });
