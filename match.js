@@ -12,7 +12,7 @@ const fs = require("fs");
 const getParsedStudentResponses = async () => {
     var topicToACMMaps = await getTopicToACMMapTableRecords();
     var studentResponses = await getStudentResponseTableRecords();
-    var acmRecords = await getACMTableRecords();
+    var acmRecordIds = await getACMTableRecords();
 
     var parsedStudentResponses = [];
 
@@ -22,18 +22,18 @@ const getParsedStudentResponses = async () => {
             topicToACMMaps
                 .filter((topicMap) => topicMap.topicRecordId == roughChoiceID)
                 .forEach((topicMap) => {
-                    var realACMKeyword = acmRecords.find(
-                        (acm) => acm.acmRecordId == topicMap.acmRecordId
+                    var realACMKeywordId = acmRecordIds.find(
+                        (acmRecordId) => acmRecordId == topicMap.acmRecordId
                     );
                     realACMKeywords.push({
-                        keyword: realACMKeyword.acmId,
+                        acmRecordId: realACMKeywordId,
                         priority: index + 1,
                     });
                 });
         });
         parsedStudentResponses.push({
             responseId: response.responseId,
-            contactName: response.contact,
+            //contactName: response.contact,
             acmKeywords: realACMKeywords,
             choices: response.choices,
         });
@@ -44,14 +44,14 @@ const getParsedStudentResponses = async () => {
 const getParsedSupervisorResponses = async () => {
     // Get the required unparsed supervisor responses and acm keyword data
     var supervisorResponses = await getSupervisorACMTableRecords();
-    var acmRecords = await getACMTableRecords();
+    var acmRecordIds = await getACMTableRecords();
 
     var parsedSupervisorResponses = [];
 
     supervisorResponses.forEach((response) => {
         // Get the actual acm keyword from the acm's GUID
-        var realACMKeyword = acmRecords.find(
-            (acm) => acm.acmRecordId == response.acmId
+        var realACMKeywordId = acmRecordIds.find(
+            (acmRecordId) => acmRecordId == response.acmRecordId
         );
 
         // If there is already a parsed response with the same ID, append the keyword to that object's array
@@ -62,13 +62,13 @@ const getParsedSupervisorResponses = async () => {
         if (alreadyExists) {
             parsedSupervisorResponses.forEach((item) => {
                 item.responseId === response.responseId &&
-                    item.acmKeywords.push(realACMKeyword.acmId);
+                    item.acmKeywords.push(realACMKeywordId);
             });
         } else {
             // Else add a new parsed supervisor response object to the array
             parsedSupervisorResponses.push({
                 responseId: response.responseId,
-                acmKeywords: [realACMKeyword.acmId],
+                acmKeywords: [realACMKeywordId],
             });
         }
     });
