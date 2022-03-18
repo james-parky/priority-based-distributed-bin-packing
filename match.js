@@ -37,7 +37,6 @@ const getParsedStudentResponses = async () => {
             });
             parsedStudentResponses.push({
                 responseId: response.responseId,
-                //contactName: response.contact,
                 acmKeywords: realACMKeywords,
                 choices: response.choices,
             });
@@ -80,9 +79,9 @@ const getParsedSupervisorResponses = async () => {
     return parsedSupervisorResponses;
 };
 
-const writeMatches = (matches) => {
+const writetoJSON = (matches, fileName) => {
     var json = JSON.stringify(matches);
-    fs.writeFile("matches.json", json, "utf8", (err) => {
+    fs.writeFile(fileName, json, "utf8", (err) => {
         if (err) {
             throw err;
         }
@@ -92,15 +91,16 @@ const writeMatches = (matches) => {
 
 (async function match() {
     var parsedStudentResponses = await getParsedStudentResponses();
-    console.log(parsedStudentResponses);
+    //writetoJSON(parsedStudentResponses, "student_responses.json");
     var parsedSupervisorResponses = await getParsedSupervisorResponses();
+    //writetoJSON(parsedSupervisorResponses, "supervisor_responses.json");
     var allMatches = [];
 
     parsedSupervisorResponses.forEach((supervisorResponse) => {
         var matches = [];
 
         parsedStudentResponses.forEach((studentResponse) => {
-            studentResponse.acmKeywords.forEach((acmRecordId) => {
+            studentResponse.acmKeywords.forEach(({ acmRecordId, priority }) => {
                 supervisorResponse.acmKeywords.includes(acmRecordId) &&
                     matches.push({
                         studentResponseId: studentResponse.responseId,
@@ -114,8 +114,7 @@ const writeMatches = (matches) => {
             matchedStudentResponses: matches,
         });
     });
-    console.log(allMatches);
-    writeMatches({ matches: allMatches });
+    writetoJSON({ matches: allMatches }, "matches.json");
 })();
 
 /*
@@ -129,4 +128,13 @@ const writeMatches = (matches) => {
 |    This repeats until the administrator is satsified with the results                                  |
 |    They will also have an option to start again, removing all matches                                  |
 =--------------------------------------------------------------------------------------------------------+
+*/
+
+/*                                       ===ALGORITHM IDEAS=== 
+    Evenly spread matches across the professes based on the supervisers capacity.
+    Should match all first choices first then second choices then third choices.
+
+
+    Make all possible matches then go through and assign students to professors.
+
 */
