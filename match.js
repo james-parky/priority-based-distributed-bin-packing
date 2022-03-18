@@ -8,6 +8,7 @@ import {
 
 import { createRequire } from "module";
 import { parse } from "path";
+import { versions } from "process";
 const require = createRequire(import.meta.url);
 const fs = require("fs");
 
@@ -107,24 +108,51 @@ const writetoJSON = (matches, fileName) => {
     //writetoJSON(parsedSupervisorResponses, "supervisor_responses.json");
     var allMatches = [];
 
+    var bins = [];
+
     parsedSupervisorResponses.forEach((supervisorResponse) => {
         var matches = [];
+        var takenSpaces = 0;
 
         parsedStudentResponses.forEach((studentResponse) => {
             studentResponse.acmKeywords.forEach(({ acmRecordId, priority }) => {
-                supervisorResponse.acmKeywords.includes(acmRecordId) &&
-                    matches.push({
-                        studentResponseId: studentResponse.responseId,
-                        commonACMKeywordId: acmRecordId,
-                        studentsChoices: studentResponse.choices,
-                    });
+                if (supervisorResponse.acmKeywords.includes(acmRecordId)) {
+                    var alreadyExists = matches.some(
+                        (match) =>
+                            match.studentResponseId ===
+                            studentResponse.responseId
+                    );
+
+                    if (alreadyExists) {
+                        matches
+                            .find(
+                                (match) =>
+                                    match.studentResponseId ===
+                                    studentResponse.responseId
+                            )
+                            .commonACMKeywordId.push(acmRecordId);
+                    } else {
+                        matches.push({
+                            studentResponseId: studentResponse.responseId,
+                            commonACMKeywordId: [acmRecordId],
+                            studentsChoices: studentResponse.choices,
+                        });
+                        takenSpaces += 1;
+                    }
+                }
             });
         });
         allMatches.push({
             supervisorResponseId: supervisorResponse.responseId,
             matchedStudentResponses: matches,
         });
+        bins.push({
+            supervisorResponseId: supervisorResponse.responseId,
+            capacity: supervisorResponse.capacity,
+            takenSpaces,
+        });
     });
+    console.log(bins);
     writetoJSON({ matches: allMatches }, "matches.json");
 })();
 
