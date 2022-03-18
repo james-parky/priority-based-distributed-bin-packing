@@ -3,9 +3,11 @@ import {
     getStudentResponseTableRecords,
     getSupervisorACMTableRecords,
     getTopicToACMMapTableRecords,
+    getSupervisorResponseTableRecords,
 } from "./get_methods.js";
 
 import { createRequire } from "module";
+import { parse } from "path";
 const require = createRequire(import.meta.url);
 const fs = require("fs");
 
@@ -48,6 +50,7 @@ const getParsedStudentResponses = async () => {
 const getParsedSupervisorResponses = async () => {
     // Get the required unparsed supervisor responses and acm keyword data
     var supervisorResponses = await getSupervisorACMTableRecords();
+    var supervisorCapacities = await getSupervisorResponseTableRecords();
     var acmRecordIds = await getACMTableRecords();
 
     var parsedSupervisorResponses = [];
@@ -76,6 +79,14 @@ const getParsedSupervisorResponses = async () => {
             });
         }
     });
+
+    // Adds the capacity of each supervisor to each parsd supervisor response object
+    supervisorCapacities.forEach(({ supervisorId, capacity }) => {
+        parsedSupervisorResponses.find(
+            (response) => response.responseId == supervisorId
+        ).capacity = capacity;
+    });
+
     return parsedSupervisorResponses;
 };
 

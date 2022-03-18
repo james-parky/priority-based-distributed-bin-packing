@@ -51,3 +51,17 @@ export const getSupervisorACMTableRecords = async () => {
         }))
         .filter((response) => response.responseId !== undefined);
 };
+
+export const getSupervisorResponseTableRecords = async () => {
+    const res = await fetch(
+        "https://prod-83.westeurope.logic.azure.com:443/workflows/dac876dbda68495aa79ed4c5c51fe4ce/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=-OshpHPrkQoqmSiaO3MvyAvThKurFff0LPOIQ0x-4OY"
+    );
+    const data = await res.json();
+    return data
+        .map((response) => ({
+            supervisorId: response.team42_supervisorresponsesv2id,
+            capacity: response.team42_capacity,
+        }))
+        .filter((response) => response.supervisorId !== undefined)
+        .filter((response) => response.capacity !== undefined);
+};
