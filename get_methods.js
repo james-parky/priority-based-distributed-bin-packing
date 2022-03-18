@@ -6,15 +6,7 @@ export const getACMTableRecords = async () => {
         "https://prod-135.westeurope.logic.azure.com:443/workflows/2d76b948d1df43118b4489fbdd0d6b9e/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=yeGF5nMwSKdhwVrKBtTdivRx6eB8CJrYYP05NHNmBDw"
     );
     const data = await res.json();
-    var acmRecords = [];
-    data.forEach((acm) =>
-        acmRecords.push({
-            acmRecordId: acm.team42_acmclassificationcodesid,
-            keyword: acm.team42_keyword,
-            acmId: acm.team42_id,
-        })
-    );
-    return acmRecords;
+    return data.map((acm) => acm.team42_acmclassificationcodesid);
 };
 
 export const getStudentResponseTableRecords = async () => {
@@ -63,7 +55,7 @@ export const getSupervisorACMTableRecords = async () => {
     data.forEach((response) =>
         supervisorResponses.push({
             responseId: response._team42_supervisorresponseid_value,
-            acmId: response._team42_acmid_value,
+            acmRecordId: response._team42_acmid_value,
         })
     );
     return supervisorResponses;
