@@ -44,6 +44,7 @@ export const getSupervisorACMTableRecords = async () => {
         "https://prod-144.westeurope.logic.azure.com:443/workflows/c0820c596ba5487a90039acc9550f4b4/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=-WQ-dwFOTHlUwqqLxM0BDHT_4FDG6t6h4fdXK5RjXEA"
     );
     const data = await res.json();
+    console.log(data);
     return data
         .map((response) => ({
             responseId: response._team42_supervisorresponseid_value,
@@ -62,9 +63,6 @@ export const getSupervisorResponseTableRecords = async () => {
             supervisorId: response.team42_supervisorresponsesv2id,
             capacity: response.team42_capacity,
         }))
-        .filter(
-            (response) =>
-                response.supervisorId !== undefined &&
-                response.capacity !== undefined
-        );
+        .filter((response) => response.supervisorId !== undefined)
+        .filter((response) => response.capacity !== undefined);
 };
