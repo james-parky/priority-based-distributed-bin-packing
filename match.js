@@ -7,8 +7,6 @@ import {
 } from "./get_methods.js";
 
 import { createRequire } from "module";
-import { parse } from "path";
-import { versions } from "process";
 const require = createRequire(import.meta.url);
 const fs = require("fs");
 
@@ -108,7 +106,7 @@ const writetoJSON = (matches, fileName) => {
     //writetoJSON(parsedSupervisorResponses, "supervisor_responses.json");
     var allMatches = [];
 
-    var bins = [];
+    // var bins = [];
 
     parsedSupervisorResponses.forEach((supervisorResponse) => {
         var matches = [];
@@ -144,15 +142,16 @@ const writetoJSON = (matches, fileName) => {
         });
         allMatches.push({
             supervisorResponseId: supervisorResponse.responseId,
-            matchedStudentResponses: matches,
-        });
-        bins.push({
-            supervisorResponseId: supervisorResponse.responseId,
             capacity: supervisorResponse.capacity,
             takenSpaces,
+            matchedStudentResponses: matches,
         });
+        // bins.push({
+        //     supervisorResponseId: supervisorResponse.responseId,
+        //     capacity: supervisorResponse.capacity,
+        //     takenSpaces,
+        // });
     });
-    console.log(bins);
     writetoJSON({ matches: allMatches }, "matches.json");
 })();
 
@@ -175,5 +174,10 @@ const writetoJSON = (matches, fileName) => {
 
 
     Make all possible matches then go through and assign students to professors.
+
+
+
+    make first priority matches then second then third
+    see whos is left over and what the capacities are like
 
 */

@@ -62,6 +62,9 @@ export const getSupervisorResponseTableRecords = async () => {
             supervisorId: response.team42_supervisorresponsesv2id,
             capacity: response.team42_capacity,
         }))
-        .filter((response) => response.supervisorId !== undefined)
-        .filter((response) => response.capacity !== undefined);
+        .filter(
+            (response) =>
+                response.supervisorId !== undefined &&
+                response.capacity !== undefined
+        );
 };
