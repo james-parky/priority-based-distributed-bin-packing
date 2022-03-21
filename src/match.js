@@ -80,20 +80,24 @@ const findMatches = async (
 };
 
 const matchRemainders = async (students, supervisors) => {
+    var unmatched = [];
+
     var totalRemainingSpaces = supervisors
         .map((supervisor) => supervisor.capacity)
         .reduce((prev, current) => prev + current, 0);
 
     // Only keep enough students for the remaining spaces
-    if (students.length > totalRemainingSpaces)
+    if (students.length > totalRemainingSpaces) {
         students = students.slice(0, totalRemainingSpaces);
+        unmatched = students.slice(totalRemainingSpaces);
+    }
 
     var matchesFromRemainders = await findMatches(
         students,
         supervisors,
         "json/newMatches.json"
     );
-    return matchesFromRemainders;
+    return { matchesFromRemainders, unmatched };
 };
 
 const reviewMatches = async () => {
@@ -189,7 +193,7 @@ async function main() {
     var { initialMatches, leftOverStudents, supervisorsWithLeftOverSpace } =
         await reviewMatches();
     // Rerun with remaining unmatched students and supervisors
-    var matchesFromRemainders = await matchRemainders(
+    var { matchesFromRemainders, unmatched } = await matchRemainders(
         leftOverStudents,
         supervisorsWithLeftOverSpace
     );
@@ -197,6 +201,8 @@ async function main() {
     // Collate old and new matches
 
     collateMatches(initialMatches, matchesFromRemainders);
+
+    writetoJSON({ unmatched }, "json/unmatched.json");
 }
 
 main();
