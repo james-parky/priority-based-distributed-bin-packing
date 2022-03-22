@@ -48,7 +48,7 @@ const getAssociatedAcmKeywords = (
  * @exports
  * @async
  * @method
- * @returns {object[]} the parsed student responses data
+ * @returns {Promise<object[]>} the parsed student responses data
  */
 export const getParsedStudentResponses = async () => {
     const studentResponses = await getStudentResponseTableRecords();
@@ -85,7 +85,7 @@ export const getParsedStudentResponses = async () => {
  * @exports
  * @async
  * @method
- * @returns {object[]} the parsed supervisor responses data
+ * @returns {Promise<object[]>} the parsed supervisor responses data
  */
 export const getParsedSupervisorResponses = async () => {
     // Get the required unparsed supervisor responses and acm keyword data
