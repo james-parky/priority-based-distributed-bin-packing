@@ -98,7 +98,6 @@ export const getParsedSupervisorResponses = async () => {
         const alreadyExists = parsedSupervisorResponses.some(
             (item) => item.responseId === response.responseId
         );
-
         // If there is already a parsed response with the same ID, append the keyword to that object's array
         if (alreadyExists) {
             parsedSupervisorResponses
