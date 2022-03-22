@@ -9,7 +9,7 @@ import {
 /**
  * Find all acm keywords associated with each of the students response's three choices
  * Assign a prioirty to each acm keyword based on the choice that it is associated to
- * @method
+ * @func
  * @param {object} studentResponse an unparsed student response table record
  * @param {object[]} topicToAcmMaps the records of the maps of choices to actual acm keywords
  * @param {object[]} acmRecordIds all of the acm keyword records
@@ -47,7 +47,7 @@ const getAssociatedAcmKeywords = (
  * Formats the data into a JavaScript Object Notation (JSON) object
  * @exports
  * @async
- * @method
+ * @func
  * @returns {Promise<object[]>} the parsed student responses data
  */
 export const getParsedStudentResponses = async () => {
@@ -84,7 +84,7 @@ export const getParsedStudentResponses = async () => {
  * Formats the data into a JavaScript Object Notation (JSON) object
  * @exports
  * @async
- * @method
+ * @func
  * @returns {Promise<object[]>} the parsed supervisor responses data
  */
 export const getParsedSupervisorResponses = async () => {

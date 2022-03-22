@@ -4,56 +4,65 @@ import {
 } from "./parse_methods.js";
 
 import { writeToJson, formatAndWriteToJson } from "./write_methods.js";
-// Default functions for first time matching, man push remaining matches afterwards
-const findMatches = async (
-    parsedStudentResponses,
-    parsedSupervisorResponses,
-    outputFile
-) => {
-    // var parsedStudentResponses = await getParsedStudentResponses();
-    // //writetoJSON(parsedStudentResponses, "json/student_responses.json");
-    // var parsedSupervisorResponses = await getParsedSupervisorResponses();
 
-    //writetoJSON(parsedSupervisorResponses, "json/supervisor_responses.json");
-    var allMatches = [];
+/**
+ * Finds all students that match the given supervisor response, based on whether they share a common acm keyword
+ * @func
+ * @param {object} supervisorResponse a single parsed supervisor response
+ * @param {object[]} parsedStudentResponses an array of parsed student responses
+ * @returns {object} array of student responses found to match the given supervisor response based on acm keywords
+ */
+const findMatchingStudents = (supervisorResponse, parsedStudentResponses) => {
+    var matches = [];
+    var takenSpaces = 0;
+    parsedStudentResponses.forEach((studentResponse) => {
+        studentResponse.acmKeywords.forEach((acmKeyword) => {
+            const shareAcmKeyword = supervisorResponse.acmKeywords.includes(
+                acmKeyword.acmRecordId
+            );
+            if (shareAcmKeyword) {
+                var alreadyExists = matches.some(
+                    (match) =>
+                        match.studentResponseId === studentResponse.responseId
+                );
 
-    parsedSupervisorResponses.forEach((supervisorResponse) => {
-        var matches = [];
-        var takenSpaces = 0;
-
-        parsedStudentResponses.forEach((studentResponse) => {
-            studentResponse.acmKeywords.forEach((acmKeyword) => {
-                if (
-                    supervisorResponse.acmKeywords.includes(
-                        acmKeyword.acmRecordId
-                    )
-                ) {
-                    var alreadyExists = matches.some(
-                        (match) =>
-                            match.studentResponseId ===
-                            studentResponse.responseId
-                    );
-
-                    if (alreadyExists) {
-                        matches
-                            .find(
-                                (match) =>
-                                    match.studentResponseId ===
-                                    studentResponse.responseId
-                            )
-                            .commonACMKeywordId.push(acmKeyword);
-                    } else {
-                        matches.push({
-                            //studentResponseId: studentResponse.responseId,
-                            studentResponse,
-                            commonACMKeywordId: [acmKeyword],
-                            studentsChoices: studentResponse.choices,
-                        });
-                        takenSpaces += 1;
-                    }
+                if (alreadyExists) {
+                    matches
+                        .find(
+                            (match) =>
+                                match.studentResponseId ===
+                                studentResponse.responseId
+                        )
+                        .commonAcmKeyword.push(acmKeyword);
+                } else {
+                    matches.push({
+                        studentResponse,
+                        commonAcmKeyword: [acmKeyword],
+                        studentsChoices: studentResponse.choices,
+                    });
+                    takenSpaces += 1;
                 }
-            });
+            }
         });
+    });
+    return { matches, takenSpaces };
+};
+
+/**
+ * For each supervisor response, finds all students that match, based on whether they share a common acm keyword
+ * Keeps track of the amount of matches made to each supervisor to check whether they are under or oversubscribed
+ * @func
+ * @param {object[]} parsedStudentResponses an array of parsed student responses
+ * @param {object[]} parsedSupervisorResponses an array of parsed supervisor responses
+ * @returns {object[]} an array of all student response matches to each supervisor response
+ */
+const findMatches = (parsedStudentResponses, parsedSupervisorResponses) => {
+    var allMatches = [];
+    parsedSupervisorResponses.forEach((supervisorResponse) => {
+        var { matches, takenSpaces } = findMatchingStudents(
+            supervisorResponse,
+            parsedStudentResponses
+        );
         allMatches.push({
             supervisorResponse,
             capacity: supervisorResponse.capacity,
@@ -61,11 +70,10 @@ const findMatches = async (
             matchedStudentResponses: matches,
         });
     });
-    writeToJson({ matches: allMatches }, outputFile);
     return allMatches;
 };
 
-const matchRemainders = async (students, supervisors) => {
+const matchRemainders = (students, supervisors) => {
     var unmatched = [];
 
     var totalRemainingSpaces = supervisors
@@ -78,19 +86,14 @@ const matchRemainders = async (students, supervisors) => {
         unmatched = students.slice(totalRemainingSpaces);
     }
 
-    var matchesFromRemainders = await findMatches(
-        students,
-        supervisors,
-        "json/newMatches.json"
-    );
+    var matchesFromRemainders = findMatches(students, supervisors);
     return { matchesFromRemainders, unmatched };
 };
 
 const reviewMatches = async () => {
-    var matches = await findMatches(
+    var matches = findMatches(
         await getParsedStudentResponses(),
-        await getParsedSupervisorResponses(),
-        "json/matches.json"
+        await getParsedSupervisorResponses()
     );
 
     var leftOverStudents = [];
@@ -99,8 +102,8 @@ const reviewMatches = async () => {
     // sort student matches by the priority of the acm keyword matched
     matches.forEach((supervisor) => {
         supervisor.matchedStudentResponses.sort((student1, student2) =>
-            student1.commonACMKeywordId[0].priority >
-            student2.commonACMKeywordId[0].pririty
+            student1.commonAcmKeyword[0].priority >
+            student2.commonAcmKeyword[0].pririty
                 ? 1
                 : -1
         );
@@ -131,18 +134,6 @@ const reviewMatches = async () => {
 
     leftOverStudents = [...new Set(leftOverStudents)];
 
-    // look at left over and run matches again
-    writeToJson({ orderedMatches: matches }, "json/orderedMatches.json");
-    writeToJson(
-        {
-            leftovers: {
-                students: leftOverStudents,
-                supervisors: supervisorsWithLeftOverSpace,
-            },
-        },
-        "json/leftover.json"
-    );
-
     return {
         initialMatches: matches,
         leftOverStudents,
@@ -150,7 +141,7 @@ const reviewMatches = async () => {
     };
 };
 
-const collateMatches = async (initialMatches, matchesFromRemainders) => {
+const collateMatches = (initialMatches, matchesFromRemainders) => {
     matchesFromRemainders.forEach((match) => {
         var sameSupervisor = initialMatches.find(
             (initialMatch) =>
@@ -163,10 +154,6 @@ const collateMatches = async (initialMatches, matchesFromRemainders) => {
             ...match.matchedStudentResponses,
         ];
     });
-    writeToJson(
-        { collatedMatches: initialMatches },
-        "json/collatedMatches.json"
-    );
 
     return initialMatches;
 };
@@ -175,7 +162,7 @@ async function main() {
     var { initialMatches, leftOverStudents, supervisorsWithLeftOverSpace } =
         await reviewMatches();
     // Rerun with remaining unmatched students and supervisors
-    var { matchesFromRemainders, unmatched } = await matchRemainders(
+    var { matchesFromRemainders, unmatched } = matchRemainders(
         leftOverStudents,
         supervisorsWithLeftOverSpace
     );
@@ -195,33 +182,3 @@ async function main() {
 }
 
 main();
-
-/*
-+----------------------------------------------===USAGE===-----------------------------------------------+
-|    Admin will be able to run the code from a page using a button, or triggered by daily automatic flow |
-|    When this code is run, the generated JSON is used to populated a 'matches' table                    |
-|    Admin is presented with all matches that were made [All initially presented as 'PENDING' status]    | 
-|    Admin can manually approve or reject matches                                                        |
-|        Approved matches have their status updated to 'APPROVED'                                        |
-|        Rejected matches are removed from the table and are sent back into this algorithm               |
-|    This repeats until the administrator is satsified with the results                                  |
-|    They will also have an option to start again, removing all matches                                  |
-=--------------------------------------------------------------------------------------------------------+
-*/
-
-/*                                       ===ALGORITHM IDEAS=== 
-    Evenly spread matches across the professes based on the supervisers capacity.
-    Should match all first choices first then second choices then third choices.
-
-
-    Make all possible matches then go through and assign students to professors.
-
-
-
-    make first priority matches then second then third
-    see whos is left over and what the capacities are like
-
-
-    T
-
-*/

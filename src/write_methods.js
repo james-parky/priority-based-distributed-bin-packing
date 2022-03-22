@@ -5,7 +5,7 @@ const fs = require("fs");
 /**
  * Outputs the given object as a .json file with the given file name
  * @exports
- * @method
+ * @func
  * @param {object} matches JavaScript Object Notation (JSON) object of matches made between supervisors and students
  * @param {string} fileName filename
  * @throws {NodeJS.ErrnoException}
@@ -21,7 +21,7 @@ export const writeToJson = (matches, fileName) => {
 
 /**
  * Formats matches made between supervisors and students into a more human-readable format
- * @method
+ * @func
  * @param {object} unformattedMatches JavaScript Object Notation (JSON) object of matches made between supervisors and students
  * @returns {object} a human-readble version of the unformattedMatches paramter
  */
@@ -49,7 +49,7 @@ const formatMatches = (unformattedMatches) => {
  * Formats matches made between supervisors and students into a more human-readable format
  * and outputs the result to a .json file with the given file Name
  * @xports
- * @method
+ * @func
  * @param {object} unformattedMatches JavaScript Object Notation (JSON) object of matches made between supervisors and students
  * @param {string} fileName filename
  */
