@@ -11,8 +11,8 @@ import {
  * Assign a prioirty to each acm keyword based on the choice that it is associated to
  * @method
  * @param {object} studentResponse an unparsed student response table record
- * @param {object} topicToAcmMaps the records of the maps of choices to actual acm keywords
- * @param {object} acmRecordIds all of the acm keyword records
+ * @param {object[]} topicToAcmMaps the records of the maps of choices to actual acm keywords
+ * @param {object[]} acmRecordIds all of the acm keyword records
  * @returns {object} the actual acm keywords associated to the given student response
  */
 const getAssociatedAcmKeywords = (
@@ -48,7 +48,7 @@ const getAssociatedAcmKeywords = (
  * @exports
  * @async
  * @method
- * @returns {object} the parsed student responses data
+ * @returns {object[]} the parsed student responses data
  */
 export const getParsedStudentResponses = async () => {
     const studentResponses = await getStudentResponseTableRecords();
@@ -85,7 +85,7 @@ export const getParsedStudentResponses = async () => {
  * @exports
  * @async
  * @method
- * @returns {object} the parsed supervisor responses data
+ * @returns {object[]} the parsed supervisor responses data
  */
 export const getParsedSupervisorResponses = async () => {
     // Get the required unparsed supervisor responses and acm keyword data
