@@ -33,7 +33,7 @@ const formatMatches = (unformattedMatches) => {
         supervisor.matchedStudentResponses.forEach((student) => {
             matches.push({
                 studentResponseId: student.studentResponse.responseId,
-                commonACMKeywordId: student.commonACMKeywordId,
+                commonAcmKeyword: student.commonAcmKeyword,
             });
         });
         formattedMatches.push({
