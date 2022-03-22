@@ -20,13 +20,15 @@ const findMatchingStudents = (supervisorResponse, parsedStudentResponses) => {
             const shareAcmKeyword = supervisorResponse.acmKeywords.includes(
                 acmKeyword.acmRecordId
             );
+            // If the student shares a common acm keyword with the given supervisor,
+            // add them to the list of matches, unless they are already there,
+            // in which case append to the list of common acm keywords
             if (shareAcmKeyword) {
                 var alreadyExists = matches.some(
                     (match) =>
                         match.studentResponse.responseId ===
                         studentResponse.responseId
                 );
-
                 if (alreadyExists) {
                     matches
                         .find(
@@ -49,34 +51,35 @@ const findMatchingStudents = (supervisorResponse, parsedStudentResponses) => {
     return { matches, takenSpaces };
 };
 
+/**
+ * Finds all students that did not get matched to any supervisors
+ * @func
+ * @param {object[]} parsedStudentResponses an array of parsed student responses
+ * @param {object[]} allMatches an array of all preliminary matches made between supervisors and students
+ * @returns {object[]} an array of student responses of those that didnt have any matches
+ */
 const getUnmatchedStudents = (parsedStudentResponses, allMatches) => {
-    var unused = [];
-    var usedStudents = [];
-    usedStudents = allMatches
+    // Get all unqiue student response Ids that appear in the list of matches
+    var matchedStudents = [];
+    matchedStudents = allMatches
         .map((match) =>
             match.matchedStudentResponses.map(
                 (student) => student.studentResponse.responseId
             )
         )
         .flat();
-    usedStudents = [...new Set(usedStudents)];
+    matchedStudents = [...new Set(matchedStudents)];
 
+    // Gets the student response for all students without a match
+    var unmatched = [];
     var allStudents = [];
     allStudents = parsedStudentResponses.map((student) => student.responseId);
-    // console.log("USED STUDENT IDS");
-    // console.log(usedStudents);
-    // console.log("ALL STUDENTS");
-    // console.log(allStudents);
-
-    unused = parsedStudentResponses.filter((response) =>
+    unmatched = parsedStudentResponses.filter((response) =>
         allStudents
-            .filter((student) => !usedStudents.includes(student))
+            .filter((student) => !matchedStudents.includes(student))
             .includes(response.responseId)
     );
-
-    // console.log("UNUSED STUDENTS");
-    // console.log(unused);
-    return unused;
+    return unmatched;
 };
 
 /**
@@ -88,9 +91,9 @@ const getUnmatchedStudents = (parsedStudentResponses, allMatches) => {
  * @returns {object[]} an array of all student response matches to each supervisor response
  */
 const findMatches = (parsedStudentResponses, parsedSupervisorResponses) => {
-    var allMatches = [];
+    var matches = [];
     parsedSupervisorResponses.forEach((supervisorResponse) => {
-        var { matches, takenSpaces } = findMatchingStudents(
+        var { matchedStudentResponses, takenSpaces } = findMatchingStudents(
             supervisorResponse,
             parsedStudentResponses
         );
@@ -98,20 +101,25 @@ const findMatches = (parsedStudentResponses, parsedSupervisorResponses) => {
             supervisorResponse,
             capacity: supervisorResponse.capacity,
             takenSpaces,
-            matchedStudentResponses: matches,
+            matchedStudentResponses,
         });
     });
     var unmatchedStudents = getUnmatchedStudents(
         parsedStudentResponses,
         allMatches
     );
-    // console.log("UNMATCHED STUDENTS");
-    // console.log(unmatchedStudents);
-    return { matches: allMatches, unmatchedStudents };
+    return { matches, unmatchedStudents };
 };
 
+/**
+ * Order each supervisors students matches by the priority that the student gave to the acm keyword that they matched on
+ * @func
+ * @param {object[]} matches an array of all supervisor student matches already made
+ * @returns {object[]} an array of all supervisor student matches with the student orderd by priority
+ */
 const orderMatches = (matches) => {
     matches.forEach((supervisor) => {
+        // The lower the priority the better
         supervisor.matchedStudentResponses.sort((student1, student2) =>
             student1.commonAcmKeyword[0].priority >
             student2.commonAcmKeyword[0].pririty
@@ -122,40 +130,14 @@ const orderMatches = (matches) => {
     return matches;
 };
 
-const reviewMatches = async (matches, studentsPerSupervisor, remainder) => {
-    console.log(`Remainder: ${remainder}`);
-    // Take first n from each then let the others assign
-    var matchedStudents = [];
-    var supervisorsWithNoMatches = [];
-    matches.forEach((match, index) => {
-        // Find all students from the matches that havent been used yet
-        var unchosenStudents = match.matchedStudentResponses.filter(
-            (student) =>
-                !matchedStudents.includes(student.studentResponse.responseId)
-        );
-
-        // If there are still students that have been unmatched
-        // Take the top n matches that are still unassigned
-        if (unchosenStudents.length > 0) {
-            // Reassign the student in the match
-
-            var amountOfMatches =
-                studentsPerSupervisor + (index < remainder ? 1 : 0);
-            var chosenStudents = unchosenStudents.slice(0, amountOfMatches);
-
-            chosenStudents.forEach((student) =>
-                matchedStudents.push(student.studentResponse.responseId)
-            );
-
-            match.matchedStudentResponses = chosenStudents;
-        } else {
-            // Else there is no one left for the supervisor
-            //match.matchedStudentResponses = [];
-            supervisorsWithNoMatches.push(match.supervisorResponse);
-        }
-    });
-
-    // Remove matches that include professors that didnt get a match
+/**
+ * Removes any matches from the array that dont actually contain any students
+ * @func
+ * @param {object[]} matches an array of all supervisor student matches already made
+ * @param {*} supervisorsWithNoMatches an array of supervisor responses of supervisors with no matches
+ * @returns {object[]} an array of all supervisor student matches that actually contain students
+ */
+const removeUnmatchedSupervisors = (matches, supervisorsWithNoMatches) => {
     matches = matches.filter((match) => {
         var supervisorsWithNoMatchesIds = supervisorsWithNoMatches.map(
             (supervisor) => supervisor.responseId
@@ -164,6 +146,48 @@ const reviewMatches = async (matches, studentsPerSupervisor, remainder) => {
             match.supervisorResponse.responseId
         );
     });
+    return matches;
+};
+
+/**
+ * Reviews all possible matches found and distributes them across the supervisors
+ * @async
+ * @func
+ * @param {object[]} matches an array of all possible supervisor student matches found
+ * @param {int} studentsPerSupervisor the minimum amount of students per supervisor for a fair distribution
+ * @param {int} remainder the amount of students remaining after each supervisor is assigned the minimum number
+ * @returns {object} {the revised array of matches between supervisors and students, an array of all supervisor responses that have no matches associated with them}
+ */
+const reviewMatches = async (matches, studentsPerSupervisor, remainder) => {
+    var matchedStudents = [];
+    var supervisorsWithNoMatches = [];
+
+    matches.forEach((match, index) => {
+        // Get all students matched to the current supervisor, that have not been used in another match yet
+        var unmatchedStudents = match.matchedStudentResponses.filter(
+            (student) =>
+                !matchedStudents.includes(student.studentResponse.responseId)
+        );
+        // If the supervisor still has unmatched students as possible matches
+        // Take the correct amount of students from the list of potential matches and confirm them
+        // Else add the supervisor response the list of ones with no matches
+        if (unmatchedStudents.length > 0) {
+            var amountOfMatches =
+                studentsPerSupervisor + (index < remainder ? 1 : 0);
+            var chosenStudents = unmatchedStudents.slice(0, amountOfMatches);
+
+            chosenStudents.forEach((student) =>
+                matchedStudents.push(student.studentResponse.responseId)
+            );
+
+            match.matchedStudentResponses = chosenStudents;
+        } else {
+            supervisorsWithNoMatches.push(match.supervisorResponse);
+        }
+    });
+
+    // Remove matches that include supervisors that didnt get a match
+    matches = removeUnmatchedSupervisors(matches, supervisorsWithNoMatches);
     return { matches, supervisorsWithNoMatches };
 };
 
