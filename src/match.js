@@ -150,10 +150,12 @@ const orderMatches = (matches) => {
     return matches;
 };
 
-const reviewMatches = async (matches) => {
+const reviewMatches = async (matches, studentsPerSupervisor, remainder) => {
+    console.log(`Remainder: ${remainder}`);
+    // Take first n from each then let the others assign
     var matchedStudents = [];
     var supervisorsWithNoMatches = [];
-    matches.forEach((match) => {
+    matches.forEach((match, index) => {
         // Find all students from the matches that havent been used yet
         var unchosenStudents = match.matchedStudentResponses.filter(
             (student) =>
@@ -161,11 +163,19 @@ const reviewMatches = async (matches) => {
         );
 
         // If there are still students that have been unmatched
+        // Take the top n matches that are still unassigned
         if (unchosenStudents.length > 0) {
             // Reassign the student in the match
-            var chosenStudent = unchosenStudents[0];
-            matchedStudents.push(chosenStudent.studentResponse.responseId);
-            match.matchedStudentResponses = [chosenStudent];
+
+            var amountOfMatches =
+                studentsPerSupervisor + (index < remainder ? 1 : 0);
+            var chosenStudents = unchosenStudents.slice(0, amountOfMatches);
+
+            chosenStudents.forEach((student) =>
+                matchedStudents.push(student.studentResponse.responseId)
+            );
+
+            match.matchedStudentResponses = chosenStudents;
         } else {
             // Else there is no one left for the supervisor
             //match.matchedStudentResponses = [];
@@ -282,6 +292,13 @@ async function main() {
         ),
     ];
 
+    // Give the first pass amount to each supervisor
+    const studentsPerSupervisor = Math.floor(
+        uniqueStudents.length / uniqueSupervisors.length
+    );
+
+    const remainder = uniqueStudents.length % uniqueSupervisors.length;
+
     // Find all possible matches for each supervisor
     var { matches, unmatchedStudents } = findMatches(
         parsedStudentResponses,
@@ -295,13 +312,17 @@ async function main() {
     formatAndWriteToJson({ matches }, "json/initialMatches.json");
     writeToJson({ unmatchedStudents }, "json/unmatchedStudents.json");
 
-    //Review matches and take first from each supervisor
+    // Review matches and take first n from each supervisor
     // If the student has already been picked, move to second place etc.
-    var review = await reviewMatches(matches);
+    console.log(`Students per supervisor: ${studentsPerSupervisor}`);
+
+    var review = await reviewMatches(matches, studentsPerSupervisor, remainder);
     matches = review.matches;
+    console.log(matches);
     var supervisorsWithNoMatches = review.supervisorsWithNoMatches;
 
     formatAndWriteToJson({ matches }, "json/afterReviewMatches.json");
+    console.log("here");
     writeToJson({ supervisorsWithNoMatches }, "json/unmatchedSupervisors.json");
 
     // Unmatched students are matched to supervisors that have space left
