@@ -4,7 +4,7 @@ import {
     getSupervisorACMTableRecords,
     getTopicToACMMapTableRecords,
     getSupervisorResponseTableRecords,
-} from "./get_methods.js";
+} from "./http_methods.js";
 
 /**
  * Find all acm keywords associated with each of the students response's three choices
