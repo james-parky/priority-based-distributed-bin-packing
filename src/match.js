@@ -18,6 +18,25 @@ const writetoJSON = (matches, fileName) => {
     });
 };
 
+const writeNicelytoJSON = (unformattedMatches, fileName) => {
+    const formattedMatches = [];
+    unformattedMatches.finalMatches.forEach((supervisor) => {
+        var matches = [];
+        supervisor.matchedStudentResponses.forEach((student) => {
+            matches.push({
+                studentResponseId: student.studentResponse.responseId,
+                commonACMKeywordId: student.commonACMKeywordId,
+            });
+        });
+        formattedMatches.push({
+            supervisorResponseId: supervisor.supervisorResponse.responseId,
+            capacity: supervisor.supervisorResponse.capacity,
+            matches,
+        });
+    });
+    writetoJSON(formattedMatches, fileName);
+};
+
 // Default functions for first time matching, man push remaining matches afterwards
 const findMatches = async (
     parsedStudentResponses,
@@ -182,11 +201,7 @@ const collateMatches = async (initialMatches, matchesFromRemainders) => {
         "json/collatedMatches.json"
     );
 
-    initialMatches.forEach((match) => {
-        console.log(
-            `Capacity: ${match.capacity}\n Taken Spaces: ${match.matchedStudentResponses.length}`
-        );
-    });
+    return initialMatches;
 };
 
 async function main() {
@@ -203,6 +218,13 @@ async function main() {
     collateMatches(initialMatches, matchesFromRemainders);
 
     writetoJSON({ unmatched }, "json/unmatched.json");
+
+    var finalMatches = await collateMatches(
+        initialMatches,
+        matchesFromRemainders
+    );
+
+    writeNicelytoJSON({ finalMatches }, "json/finalMatches.json");
 }
 
 main();
