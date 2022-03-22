@@ -7,24 +7,37 @@ import {
 } from "./get_methods.js";
 
 /**
- * @typedef {object} AcmKeyword
- * @property {string} recordId record id of the acm keyword
- * @property {int} priority priority assigned by the student in their response
+ * Find all acm keywords associated with each of the students response's three choices
+ * Assign a prioirty to each acm keyword based on the choice that it is associated to
+ * @method
+ * @param {object} studentResponse an unparsed student response table record
+ * @param {object} topicToAcmMaps the records of the maps of choices to actual acm keywords
+ * @param {object} acmRecordIds all of the acm keyword records
+ * @returns {object} the actual acm keywords associated to the given student response
  */
+const getAssociatedAcmKeywords = (
+    studentResponse,
+    topicToAcmMaps,
+    acmRecordIds
+) => {
+    var realAcmKeywords = [];
+    studentResponse.choices.forEach((choiceId, index) => {
+        // Find all real acm keywords that are associated to each student response choice
+        topicToAcmMaps
+            .filter((topicMap) => topicMap.topicRecordId == choiceId)
+            .forEach((topicMap) => {
+                var realAcmRecordId = acmRecordIds.find(
+                    (acmRecordId) => acmRecordId == topicMap.acmRecordId
+                );
+                realAcmKeywords.push({
+                    acmRecordId: realAcmRecordId,
+                    priority: index + 1,
+                });
+            });
+    });
+    return realAcmKeywords;
+};
 
-/**
- * @typedef {object} StudentResponse
- * @property {string} responseId the responseid of the response
- * @property {AcmKeyword[]} acmKeywords acm keywords and assoiciated priority value
- * @property {string[]} choices the three topics that the student chose in their response
- */
-
-/**
- * @typedef {object} SupervisorResponse
- * @property {string} responseId the responseid of the response
- * @property {string[]} acmKeywords the recordids of all associated acm keywords
- * @property {int} capacity the total number of supervisees possible
- */
 /**
  * Gets all appropriate data to form a student response object
  * Removes any student responses that do not have three choices selected
@@ -35,37 +48,26 @@ import {
  * @exports
  * @async
  * @method
- * @returns {StudentResponse} the parsed student responses data
+ * @returns {object} the parsed student responses data
  */
 export const getParsedStudentResponses = async () => {
-    var topicToACMMaps = await getTopicToACMMapTableRecords();
-    var studentResponses = await getStudentResponseTableRecords();
-    var acmRecordIds = await getACMTableRecords();
+    const studentResponses = await getStudentResponseTableRecords();
+    const topicToAcmMaps = await getTopicToACMMapTableRecords();
+    const acmRecordIds = await getACMTableRecords();
 
     var parsedStudentResponses = [];
 
     studentResponses.forEach((response) => {
         // Ignores student respones that don't contain three choices from the topics list
         if (response.choices.every((choice) => choice !== undefined)) {
-            var realACMKeywords = [];
-            response.choices.forEach((roughChoiceID, index) => {
-                topicToACMMaps
-                    .filter(
-                        (topicMap) => topicMap.topicRecordId == roughChoiceID
-                    )
-                    .forEach((topicMap) => {
-                        var realACMKeywordId = acmRecordIds.find(
-                            (acmRecordId) => acmRecordId == topicMap.acmRecordId
-                        );
-                        realACMKeywords.push({
-                            acmRecordId: realACMKeywordId,
-                            priority: index + 1,
-                        });
-                    });
-            });
+            var realAcmKeywords = getAssociatedAcmKeywords(
+                response,
+                topicToAcmMaps,
+                acmRecordIds
+            );
             parsedStudentResponses.push({
                 responseId: response.responseId,
-                acmKeywords: realACMKeywords,
+                acmKeywords: realAcmKeywords,
                 choices: response.choices,
             });
         }
@@ -83,49 +85,40 @@ export const getParsedStudentResponses = async () => {
  * @exports
  * @async
  * @method
- * @returns {SupervisorResponse} the parsed supervisor responses data
+ * @returns {object} the parsed supervisor responses data
  */
 export const getParsedSupervisorResponses = async () => {
     // Get the required unparsed supervisor responses and acm keyword data
     var supervisorResponses = await getSupervisorACMTableRecords();
     var supervisorCapacities = await getSupervisorResponseTableRecords();
-    var acmRecordIds = await getACMTableRecords();
 
     var parsedSupervisorResponses = [];
 
     supervisorResponses.forEach((response) => {
-        // Get the actual acm keyword from the acm's GUID
-        var realACMKeywordId = acmRecordIds.find(
-            (acmRecordId) => acmRecordId == response.acmRecordId
-        );
-
-        // If there is already a parsed response with the same ID, append the keyword to that object's array
-        var alreadyExists = parsedSupervisorResponses.some(
+        const alreadyExists = parsedSupervisorResponses.some(
             (item) => item.responseId === response.responseId
         );
 
+        // If there is already a parsed response with the same ID, append the keyword to that object's array
         if (alreadyExists) {
-            parsedSupervisorResponses.forEach((item) => {
-                item.responseId === response.responseId &&
-                    item.acmKeywords.push(realACMKeywordId);
-            });
+            parsedSupervisorResponses
+                .find((item) => item.responseId === response.responseId)
+                .acmKeywords.push(response.acmRecordId);
         } else {
             // Else add a new parsed supervisor response object to the array
             parsedSupervisorResponses.push({
                 responseId: response.responseId,
-                acmKeywords: [realACMKeywordId],
+                acmKeywords: [response.acmRecordId],
             });
         }
     });
 
-    // Adds the capacity of each supervisor to each parsd supervisor response object
+    // Adds the capacity of each supervisor to each parsed supervisor response object
     supervisorCapacities.forEach(({ supervisorId, capacity }) => {
         const sameResponse = parsedSupervisorResponses.find(
             (response) => response.responseId === supervisorId
         );
-        if (sameResponse) {
-            sameResponse.capacity = capacity;
-        }
+        sameResponse && (sameResponse.capacity = capacity);
     });
 
     return parsedSupervisorResponses;
