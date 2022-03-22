@@ -28,7 +28,7 @@ export const writeToJson = (matches, fileName) => {
 const formatMatches = (unformattedMatches) => {
     // Only include the supervisorResponseId, capacity of that supervisor, and the matches made with them
     var formattedMatches = [];
-    unformattedMatches.finalMatches.forEach((supervisor) => {
+    unformattedMatches.matches.forEach((supervisor) => {
         var matches = [];
         supervisor.matchedStudentResponses.forEach((student) => {
             matches.push({
