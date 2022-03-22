@@ -3,6 +3,7 @@ globalThis.fetch = fetch;
 
 /**
  * Gets the table data from the ACM Keywords table and formats it to a JavaScript Object Notation (JSON) object
+ * @exports
  * @async
  * @method
  * @returns {object} the data pulled from the table formatted to a JavaScript Object Notation (JSON) object
@@ -18,6 +19,7 @@ export const getACMTableRecords = async () => {
 /**
  * Gets the table data from the Student Responses table, formats it to a JavaScript Object Notation (JSON) object
  * and removes any records that have no responseid
+ * @exports
  * @async
  * @method
  * @returns {object} the data pulled from the table formatted to a JavaScript Object Notation (JSON) object
@@ -42,6 +44,7 @@ export const getStudentResponseTableRecords = async () => {
 
 /**
  * Gets the table data from the Topic To ACM Map table and formats it to a JavaScript Object Notation (JSON) object
+ * @exports
  * @async
  * @method
  * @returns {object} the data pulled from the table formatted to a JavaScript Object Notation (JSON) object
@@ -61,6 +64,7 @@ export const getTopicToACMMapTableRecords = async () => {
 /**
  * Gets the table data from the Supervisor ACM table, formats it to a JavaScript Object Notation (JSON) object
  * and removes any records that have no responseid
+ * @exports
  * @async
  * @method
  * @returns {object} the data pulled from the table formatted to a JavaScript Object Notation (JSON) object
@@ -81,6 +85,7 @@ export const getSupervisorACMTableRecords = async () => {
 /**
  * Gets the tables data from the Supervisor Resposne table, formats it to a JavaScript Object Notation (JSON) object
  * and removes any records that have either no responseid or no capacity value
+ * @exports
  * @async
  * @method
  * @returns {object} the data pulled from the table formatted to a JavaScript Object Notation (JSON) object

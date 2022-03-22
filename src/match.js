@@ -3,40 +3,7 @@ import {
     getParsedSupervisorResponses,
 } from "./parse_methods.js";
 
-import { createRequire } from "module";
-import { match } from "assert";
-const require = createRequire(import.meta.url);
-const fs = require("fs");
-
-const writetoJSON = (matches, fileName) => {
-    var json = JSON.stringify(matches);
-    fs.writeFile(fileName, json, "utf8", (err) => {
-        if (err) {
-            throw err;
-        }
-        console.log("JSON data is saved.");
-    });
-};
-
-const writeNicelytoJSON = (unformattedMatches, fileName) => {
-    const formattedMatches = [];
-    unformattedMatches.finalMatches.forEach((supervisor) => {
-        var matches = [];
-        supervisor.matchedStudentResponses.forEach((student) => {
-            matches.push({
-                studentResponseId: student.studentResponse.responseId,
-                commonACMKeywordId: student.commonACMKeywordId,
-            });
-        });
-        formattedMatches.push({
-            supervisorResponseId: supervisor.supervisorResponse.responseId,
-            capacity: supervisor.supervisorResponse.capacity,
-            matches,
-        });
-    });
-    writetoJSON(formattedMatches, fileName);
-};
-
+import { writeToJson, formatAndWriteToJson } from "./write_methods.js";
 // Default functions for first time matching, man push remaining matches afterwards
 const findMatches = async (
     parsedStudentResponses,
@@ -94,7 +61,7 @@ const findMatches = async (
             matchedStudentResponses: matches,
         });
     });
-    writetoJSON({ matches: allMatches }, outputFile);
+    writeToJson({ matches: allMatches }, outputFile);
     return allMatches;
 };
 
@@ -165,8 +132,8 @@ const reviewMatches = async () => {
     leftOverStudents = [...new Set(leftOverStudents)];
 
     // look at left over and run matches again
-    writetoJSON({ orderedMatches: matches }, "json/orderedMatches.json");
-    writetoJSON(
+    writeToJson({ orderedMatches: matches }, "json/orderedMatches.json");
+    writeToJson(
         {
             leftovers: {
                 students: leftOverStudents,
@@ -196,7 +163,7 @@ const collateMatches = async (initialMatches, matchesFromRemainders) => {
             ...match.matchedStudentResponses,
         ];
     });
-    writetoJSON(
+    writeToJson(
         { collatedMatches: initialMatches },
         "json/collatedMatches.json"
     );
@@ -217,14 +184,14 @@ async function main() {
 
     collateMatches(initialMatches, matchesFromRemainders);
 
-    writetoJSON({ unmatched }, "json/unmatched.json");
+    writeToJson({ unmatched }, "json/unmatched.json");
 
     var finalMatches = await collateMatches(
         initialMatches,
         matchesFromRemainders
     );
 
-    writeNicelytoJSON({ finalMatches }, "json/finalMatches.json");
+    formatAndWriteToJson({ finalMatches }, "json/finalMatches.json");
 }
 
 main();

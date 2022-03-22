@@ -4,6 +4,7 @@ const fs = require("fs");
 
 /**
  * Outputs the given object as a .json file with the given file name
+ * @exports
  * @method
  * @param {object} matches JavaScript Object Notation (JSON) object of matches made between supervisors and students
  * @param {string} fileName filename
@@ -47,6 +48,7 @@ const formatMatches = (unformattedMatches) => {
 /**
  * Formats matches made between supervisors and students into a more human-readable format
  * and outputs the result to a .json file with the given file Name
+ * @xports
  * @method
  * @param {object} unformattedMatches JavaScript Object Notation (JSON) object of matches made between supervisors and students
  * @param {string} fileName filename

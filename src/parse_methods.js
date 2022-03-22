@@ -6,6 +6,37 @@ import {
     getSupervisorResponseTableRecords,
 } from "./get_methods.js";
 
+/**
+ * @typedef {object} AcmKeyword
+ * @property {string} recordId record id of the acm keyword
+ * @property {int} priority priority assigned by the student in their response
+ */
+
+/**
+ * @typedef {object} StudentResponse
+ * @property {string} responseId the responseid of the response
+ * @property {AcmKeyword[]} acmKeywords acm keywords and assoiciated priority value
+ * @property {string[]} choices the three topics that the student chose in their response
+ */
+
+/**
+ * @typedef {object} SupervisorResponse
+ * @property {string} responseId the responseid of the response
+ * @property {string[]} acmKeywords the recordids of all associated acm keywords
+ * @property {int} capacity the total number of supervisees possible
+ */
+/**
+ * Gets all appropriate data to form a student response object
+ * Removes any student responses that do not have three choices selected
+ * Gets all acm keywords associated with the responses three choices
+ * Assigns priorities to each of the acm keywords
+ * Repeats for every record in the student responses table
+ * Formats the data into a JavaScript Object Notation (JSON) object
+ * @exports
+ * @async
+ * @method
+ * @returns {StudentResponse} the parsed student responses data
+ */
 export const getParsedStudentResponses = async () => {
     var topicToACMMaps = await getTopicToACMMapTableRecords();
     var studentResponses = await getStudentResponseTableRecords();
@@ -42,6 +73,18 @@ export const getParsedStudentResponses = async () => {
     return parsedStudentResponses;
 };
 
+/**
+ * Gets all appropriate data to form a supervisor response object
+ * Removes any supervisor responses that do not have three choices selected
+ * Collates multiple supervisor response records into one per supervisor responseid
+ * Gets the associated capacity for each supervisor response
+ * Repeats for every record in the the supervisor acm table
+ * Formats the data into a JavaScript Object Notation (JSON) object
+ * @exports
+ * @async
+ * @method
+ * @returns {SupervisorResponse} the parsed supervisor responses data
+ */
 export const getParsedSupervisorResponses = async () => {
     // Get the required unparsed supervisor responses and acm keyword data
     var supervisorResponses = await getSupervisorACMTableRecords();
