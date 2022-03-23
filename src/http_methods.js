@@ -38,8 +38,10 @@ export const getStudentResponseTableRecords = async () => {
                 response._team42_thirdchoiceinterest_value,
             ],
             contact: response._team42_portalcontact_value,
+            available: response.team42_available,
         }))
-        .filter((response) => response.responseId !== undefined);
+        .filter((response) => response.responseId !== undefined)
+        .filter((response) => response.available);
 };
 
 /**
@@ -99,7 +101,24 @@ export const getSupervisorResponseTableRecords = async () => {
         .map((response) => ({
             supervisorId: response.team42_supervisorresponsesv2id,
             capacity: response.team42_capacity,
+            available: response.team42_available,
         }))
         .filter((response) => response.supervisorId !== undefined)
-        .filter((response) => response.capacity !== undefined);
+        .filter((response) => response.capacity !== undefined)
+        .filter((response) => response.available);
+};
+
+export const postToDataverse = async (
+    matches,
+    unmatchedStudents,
+    unmatchedSupervisors
+) => {
+    await fetch(
+        "https://prod-189.westeurope.logic.azure.com:443/workflows/a0a223a950e04c969920c1e43b22d8c5/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=J6S-qD7JVGn4H4b7F-U7Ho55zIQShtJbWPx8-ERJMTg",
+        {
+            method: "POST",
+            headers: { "Content-type": "application/json" },
+            body: JSON.stringify(matches),
+        }
+    );
 };

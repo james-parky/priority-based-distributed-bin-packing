@@ -3,7 +3,13 @@ import {
     getParsedSupervisorResponses,
 } from "./parse_methods.js";
 
-import { writeToJson, formatAndWriteToJson } from "./write_methods.js";
+import {
+    writeToJson,
+    formatAndWriteToJson,
+    formatMatches,
+} from "./write_methods.js";
+
+import { postToDataverse } from "./http_methods.js";
 
 /**
  * Finds all students that match the given supervisor response, based on whether they share a common acm keyword
@@ -48,7 +54,7 @@ const findMatchingStudents = (supervisorResponse, parsedStudentResponses) => {
             }
         });
     });
-    return { matches, takenSpaces };
+    return { matchedStudentResponses: matches, takenSpaces };
 };
 
 /**
@@ -97,7 +103,7 @@ const findMatches = (parsedStudentResponses, parsedSupervisorResponses) => {
             supervisorResponse,
             parsedStudentResponses
         );
-        allMatches.push({
+        matches.push({
             supervisorResponse,
             capacity: supervisorResponse.capacity,
             takenSpaces,
@@ -106,7 +112,7 @@ const findMatches = (parsedStudentResponses, parsedSupervisorResponses) => {
     });
     var unmatchedStudents = getUnmatchedStudents(
         parsedStudentResponses,
-        allMatches
+        matches
     );
     return { matches, unmatchedStudents };
 };
@@ -231,10 +237,19 @@ async function main() {
 
     var review = await reviewMatches(matches, studentsPerSupervisor, remainder);
     matches = review.matches;
-    var supervisorsWithNoMatches = review.supervisorsWithNoMatches;
+    var unmatchedSupervisors = review.supervisorsWithNoMatches;
 
     formatAndWriteToJson({ matches }, "json/afterReviewMatches.json");
+
+    writeToJson({ matches }, "json/rawMatches.json");
     writeToJson({ unmatchedStudents }, "json/unmatchedStudents.json");
-    writeToJson({ supervisorsWithNoMatches }, "json/unmatchedSupervisors.json");
+    writeToJson({ unmatchedSupervisors }, "json/unmatchedSupervisors.json");
+
+    // Post to correct table
+    postToDataverse(
+        formatMatches({ matches }),
+        unmatchedStudents,
+        unmatchedSupervisors
+    );
 }
 main();

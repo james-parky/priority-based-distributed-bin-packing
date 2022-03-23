@@ -21,11 +21,12 @@ export const writeToJson = (matches, fileName) => {
 
 /**
  * Formats matches made between supervisors and students into a more human-readable format
+ * @exports
  * @func
  * @param {object} unformattedMatches JavaScript Object Notation (JSON) object of matches made between supervisors and students
  * @returns {object} a human-readble version of the unformattedMatches paramter
  */
-const formatMatches = (unformattedMatches) => {
+export const formatMatches = (unformattedMatches) => {
     // Only include the supervisorResponseId, capacity of that supervisor, and the matches made with them
     var formattedMatches = [];
     unformattedMatches.matches.forEach((supervisor) => {
@@ -42,7 +43,7 @@ const formatMatches = (unformattedMatches) => {
             matches,
         });
     });
-    return formattedMatches;
+    return { pairs: formattedMatches };
 };
 
 /**
