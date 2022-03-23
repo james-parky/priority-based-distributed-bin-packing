@@ -140,7 +140,7 @@ const orderMatches = (matches) => {
  * Removes any matches from the array that dont actually contain any students
  * @func
  * @param {object[]} matches an array of all supervisor student matches already made
- * @param {*} supervisorsWithNoMatches an array of supervisor responses of supervisors with no matches
+ * @param {object[]} supervisorsWithNoMatches an array of supervisor responses of supervisors with no matches
  * @returns {object[]} an array of all supervisor student matches that actually contain students
  */
 const removeUnmatchedSupervisors = (matches, supervisorsWithNoMatches) => {
