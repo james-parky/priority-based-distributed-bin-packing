@@ -201,26 +201,7 @@ async function main() {
     const parsedStudentResponses = await getParsedStudentResponses();
     const parsedSupervisorResponses = await getParsedSupervisorResponses();
 
-    const numUniqueStudents = [
-        ...new Set(
-            parsedStudentResponses.map((response) => response.responseId)
-        ),
-    ].length;
-
-    const numUniqueSupervisors = [
-        ...new Set(
-            parsedSupervisorResponses.map((response) => response.responseId)
-        ),
-    ].length;
-
-    // Give the first pass amount to each supervisor
-    const studentsPerSupervisor = Math.floor(
-        numUniqueStudents / numUniqueSupervisors
-    );
-
-    const remainder = numUniqueStudents % numUniqueSupervisors;
-
-    // Find all possible matches for each supervisor
+    // Find all possible matches for each supervisor and student
     var { matches, unmatchedStudents } = findMatches(
         parsedStudentResponses,
         parsedSupervisorResponses
@@ -229,23 +210,32 @@ async function main() {
     // Order matches based on the priority of the acm keyword they matched on
     matches = orderMatches(matches);
 
-    // Write to JSON to check
-    //formatAndWriteToJson({ matches }, "json/initialMatches.json");
-
-    // Review matches and take first n from each supervisor
-    // If the student has already been picked, move to second place etc.
-
+    const numUniqueStudents = [
+        ...new Set(
+            parsedStudentResponses.map((response) => response.responseId)
+        ),
+    ].length;
+    const numUniqueSupervisors = [
+        ...new Set(
+            parsedSupervisorResponses.map((response) => response.responseId)
+        ),
+    ].length;
+    // All supervisors get a minimum amount of students, being the integer division of students / supervisors
+    const studentsPerSupervisor = Math.floor(
+        numUniqueStudents / numUniqueSupervisors
+    );
+    // The remaining n students are distributed across the first n supervisors
+    const remainder = numUniqueStudents % numUniqueSupervisors;
     var review = await reviewMatches(matches, studentsPerSupervisor, remainder);
     matches = review.matches;
     var unmatchedSupervisors = review.supervisorsWithNoMatches;
 
     formatAndWriteToJson({ matches }, "json/afterReviewMatches.json");
-
     writeToJson({ matches }, "json/rawMatches.json");
     writeToJson({ unmatchedStudents }, "json/unmatchedStudents.json");
     writeToJson({ unmatchedSupervisors }, "json/unmatchedSupervisors.json");
 
-    // Post to correct table
+    // Post to Supervisor-Student Pairs table
     postToDataverse(
         formatMatches({ matches }),
         unmatchedStudents,
